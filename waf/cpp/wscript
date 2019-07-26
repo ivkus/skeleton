@@ -1,11 +1,15 @@
 #!/usr/bin/python
 
 def options(opt):
-	opt.load('compiler_cxx')
+    opt.load('compiler_cxx')
 
 
 def configure(conf):
-	conf.load('compiler_cxx')
+    conf.load('compiler_cxx')
 
 def build(bld):
-	bld.program(source='main.cc', target='app')
+    bld.program(
+	    source='main.cc',
+	    target='app',
+	    cxxflags='-std=c++17',
+    )
