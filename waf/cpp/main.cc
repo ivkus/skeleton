@@ -26,18 +26,22 @@ int main()
         threads.emplace_back([&stop]() {
             while (true)
             {
-                std::unique_lock<std::mutex> lock{ gs_mtx };
-                cv.wait(lock, [&stop]() {
-                    return !gs_queue.empty() || stop;
-                });
-                // wait的时候会自动释放gs_mtx，唤醒的时候自动重新获取gs_mtx
-                if (stop)
+                std::function<void()> f;
                 {
-                    std::cout << std::this_thread::get_id() << " got quit" << std::endl;
-                    break; // break就跳出循环，代表线程结束了
+                    // 作用域要包起来，这样f在执行的时候就不占用mutex了
+                    std::unique_lock<std::mutex> lock{ gs_mtx };
+                    cv.wait(lock, [&stop]() {
+                        return !gs_queue.empty() || stop;
+                    });
+                    // wait的时候会自动释放gs_mtx，唤醒的时候自动重新获取gs_mtx
+                    if (stop)
+                    {
+                        std::cout << std::this_thread::get_id() << " got quit" << std::endl;
+                        break; // break就跳出循环，代表线程结束了
+                    }
+                    f = std::move(gs_queue.front());
+                    gs_queue.pop();
                 }
-                auto f = std::move(gs_queue.front());
-                gs_queue.pop();
                 f();
             }
         });

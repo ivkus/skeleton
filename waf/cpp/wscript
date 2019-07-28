@@ -9,7 +9,8 @@ def configure(conf):
 
 def build(bld):
     bld.program(
-	    source='main.cc',
-	    target='app',
-	    cxxflags='-std=c++17',
+        source='main.cc',
+        target='app',
+        cxxflags='-std=c++17',
+        lib='pthread',
     )
